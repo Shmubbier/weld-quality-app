@@ -1,0 +1,7 @@
+{
+  "name": "yolo26m-seg @1024",
+  "date": "2026-10-02",
+  "weights": "best.pt",
+  "url": "https://github.com/Shmubbier/weld-quality-app/releases/download/v1/best.pt",
+  "notes": "YOLO26 medium segmentation, trained at imgsz=1024 on the merged 4-member weld dataset (classes: bad-weld, defect, good-weld). To swap in a better model see README."
+}
