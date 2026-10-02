@@ -1,15 +1,26 @@
-# Weld Quality & Defect Classifier
+# Weld Quality and Defect Classifier
 
-Deep-learning image segmentation that classifies weld quality into **bad-weld**,
-**defect**, and **good-weld** regions. Upload a weld image and the model outlines
-each region with a confidence score and mask area.
+Deep-learning image segmentation that classifies weld quality into bad-weld, defect,
+and good-weld regions. Upload a weld image, pick a trained model (or compare two side
+by side), and the app outlines each region with a confidence score and mask area.
 
-**Model:** YOLO26 medium segmentation (`yolo26m-seg`, imgsz 1024), trained on the
-merged 4-member weld dataset.
+Styling follows `DESIGN.md` (dark editorial theme, teal and orange accents).
 
-> Live app: _add your Streamlit Cloud URL here after deploying_
+> Live app: add your Streamlit Cloud URL here after deploying.
 
----
+## Models included
+
+Weights are hosted as GitHub Release assets and downloaded by the app on first use.
+They are listed in `model_version.json`:
+
+| Model | Arch | Image size | Epochs | Box mAP50 |
+|-------|------|-----------|--------|-----------|
+| YOLO26s @640 (default) | YOLO26 | 640 | 180 | 0.68 |
+| YOLO26m @1024 | YOLO26 | 1024 | 39 | 0.48 |
+| YOLOv8m @640 | YOLOv8 | 640 | 300 | 0.74 |
+
+The sidebar "Compare with a second model" option runs two models on the same image so
+you can see the difference in detections and overlays.
 
 ## Run locally
 
@@ -18,66 +29,51 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Self-check the model loads correctly (no Streamlit needed):
+Self-check that the default model loads (no Streamlit needed):
 
 ```bash
-python app.py        # prints "demo OK: {0: 'bad-weld', 1: 'defect', 2: 'good-weld'}"
+python app.py
 ```
 
----
+It prints `demo OK: yolo26s_640 {0: 'bad-weld', 1: 'defect', 2: 'good-weld'}`.
 
 ## Deploy to Streamlit Community Cloud
 
-1. Push this folder to a GitHub repo (see below).
-2. Go to <https://share.streamlit.io> → sign in with GitHub → **New app**.
-3. Pick the repo, branch `main`, main file `app.py` → **Deploy**.
+1. Push this folder to a GitHub repo.
+2. Go to https://share.streamlit.io, sign in with GitHub, choose New app.
+3. Pick the repo, branch `main`, main file `app.py`, then Deploy.
 
-That's it — Streamlit installs `requirements.txt` and serves `app.py`. Every push
-to `main` auto-redeploys.
-
----
+Streamlit installs `requirements.txt` and serves `app.py`. Every push to `main`
+redeploys automatically. First load of each model downloads its weights once.
 
 ## Iterate after the deadline (ship a better model)
 
-The model is **one file** (`best.pt`) plus `model_version.json` for its display
-name/date. When a future training run scores better:
+Each model is one weights file plus one entry in `model_version.json`. To add or
+replace a model when a training run scores better:
 
-**If the new `best.pt` is ≤ 100 MB** (GitHub's per-file limit — a `yolo26m` model
-is ~55 MB, so this is the normal case):
+1. Strip the new weights to shrink them (run in your training environment):
+   ```bash
+   python -c "from ultralytics.utils.torch_utils import strip_optimizer; strip_optimizer('best.pt')"
+   ```
+2. Upload the file as a Release asset, for example a new tag `v2`:
+   ```bash
+   gh release create v2 best.pt
+   ```
+   If git or the release upload is blocked on your network, upload the asset through
+   the GitHub web UI (Releases, Draft a new release, attach the file) instead.
+3. Add or edit an entry in `model_version.json` with the new `url`, `name`, `date`,
+   and metrics. Set `"default": true` on the one you want selected first.
+4. Commit and push `model_version.json`.
 
-```bash
-# 1. Strip the new weights to shrink them (one-time, run in your training env):
-python -c "from ultralytics.utils.torch_utils import strip_optimizer; strip_optimizer('best.pt')"
-
-# 2. Replace the file and update its label:
-cp /path/to/new/best.pt best.pt
-#    edit model_version.json -> bump "name" and "date"
-
-# 3. Push:
-git add best.pt model_version.json && git commit -m "Update model" && git push
-```
-
-Streamlit redeploys in ~1 minute and serves the new model. The app keys its cache
-on `name`+`date`, so the new weights take effect automatically — no code change.
-
-**If the new `best.pt` is > 100 MB** (e.g. a larger `yolo26l`): don't commit it.
-Upload it as a GitHub **Release asset** instead, then set its download URL in
-`model_version.json`:
-
-```json
-{ "weights": "best.pt", "url": "https://github.com/<you>/<repo>/releases/download/v2/best.pt", ... }
-```
-
-Leave `best.pt` out of the repo; the app downloads it from `url` on first load.
-
----
+The app keys its model cache on each model id, so the new model appears in the
+selector on the next redeploy with no code change.
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `app.py` | The whole app: upload → inference → masks + detection table + download |
-| `best.pt` | Trained YOLO26-seg weights (the model) |
-| `model_version.json` | Model display name/date + optional remote `url` (the swap knob) |
-| `requirements.txt` | Python deps for Streamlit Cloud |
-| `sample_images/` | Demo welds so reviewers can one-click run |
+| `app.py` | The app: upload or sample, run or compare models, show masks, table, download |
+| `model_version.json` | The list of models (name, metrics, download url). The selector and the swap knob |
+| `DESIGN.md` | The visual design spec the theme follows |
+| `requirements.txt` | Python dependencies for Streamlit Cloud |
+| `sample_images/` | Demo welds so reviewers can run the app in one click |
