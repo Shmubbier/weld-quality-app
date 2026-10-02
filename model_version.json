@@ -1,7 +1,41 @@
 {
-  "name": "yolo26m-seg @1024",
-  "date": "2026-10-02",
-  "weights": "best.pt",
-  "url": "https://github.com/Shmubbier/weld-quality-app/releases/download/v1/best.pt",
-  "notes": "YOLO26 medium segmentation, trained at imgsz=1024 on the merged 4-member weld dataset (classes: bad-weld, defect, good-weld). To swap in a better model see README."
+  "models": [
+    {
+      "id": "yolo26s_640",
+      "name": "YOLO26s @640",
+      "arch": "YOLO26",
+      "date": "2026-10-02",
+      "epochs": 180,
+      "box_map50": 0.676,
+      "mask_map50": 0.659,
+      "weights": "best_yolo26s_640.pt",
+      "url": "https://github.com/Shmubbier/weld-quality-app/releases/download/v1/best_yolo26s_640.pt",
+      "default": true,
+      "notes": "YOLO26 small, imgsz 640, 180 epochs. Best fully trained YOLO26 run."
+    },
+    {
+      "id": "yolo26m_1024",
+      "name": "YOLO26m @1024",
+      "arch": "YOLO26",
+      "date": "2026-10-02",
+      "epochs": 39,
+      "box_map50": 0.482,
+      "mask_map50": 0.457,
+      "weights": "best.pt",
+      "url": "https://github.com/Shmubbier/weld-quality-app/releases/download/v1/best.pt",
+      "notes": "YOLO26 medium, imgsz 1024, stopped at 39 epochs (undertrained). Higher resolution but not fully converged."
+    },
+    {
+      "id": "yolov8m_640",
+      "name": "YOLOv8m @640",
+      "arch": "YOLOv8",
+      "date": "2026-10-02",
+      "epochs": 300,
+      "box_map50": 0.742,
+      "mask_map50": 0.726,
+      "weights": "best_yolov8m_640.pt",
+      "url": "https://github.com/Shmubbier/weld-quality-app/releases/download/v1/best_yolov8m_640.pt",
+      "notes": "YOLOv8 medium, imgsz 640, 300 epochs. Different architecture, highest metrics; included for comparison."
+    }
+  ]
 }
