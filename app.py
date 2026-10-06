@@ -213,7 +213,8 @@ with tab_upload:
 with tab_sample:
     if samples:
         choice = st.selectbox("Sample weld image", [p.name for p in samples])
-        if choice:
+        # Upload wins: only fall back to the sample when nothing was uploaded.
+        if choice and up is None:
             pil_img, src_name = Image.open(sample_dir / choice), choice
     else:
         st.info("No sample images bundled.")
